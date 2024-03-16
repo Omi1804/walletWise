@@ -10,19 +10,17 @@ declare global {
   }
 }
 
-export const authenticateUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.header("Authorization");
+
   try {
     if (authHeader) {
-      const token = authHeader.split("")[0];
+      const token = authHeader.split(" ")[1];
       if (token && secret) {
-        const payload = jwt.verify(token, secret) as { _id: string };
+        const payload = jwt.verify(token, secret) as { userId: string };
         console.log("from middleware : ", payload);
-        req.userId = payload._id;
+
+        req.userId = payload.userId;
         next();
       } else {
         return res
@@ -37,3 +35,5 @@ export const authenticateUser = (
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export default authenticateUser;

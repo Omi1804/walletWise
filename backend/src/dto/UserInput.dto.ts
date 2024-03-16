@@ -9,3 +9,9 @@ export interface UserLogInput {
   email: string;
   password: string;
 }
+
+export interface UserUpdateInput {
+  name?: string;
+  password?: string;
+  phone?: number;
+}

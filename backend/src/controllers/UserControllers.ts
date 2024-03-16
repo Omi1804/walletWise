@@ -3,7 +3,7 @@ import { z } from "zod";
 import jwt from "jsonwebtoken";
 const secret = process.env.SEC_KEY;
 import { Users } from "../models/User";
-import { UserInput, UserLogInput } from "../dto";
+import { UserInput, UserLogInput, UserUpdateInput } from "../dto";
 
 const UserSignupInputCheck = z.object({
   email: z.string().email().max(20),
@@ -84,6 +84,58 @@ export const UserLogin = async (
       .json({ message: "User Logged in successfully!", token });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const UserUpdateInputCheck = z.object({
+  name: z.string().optional(),
+  password: z.string().min(3).max(20).optional(),
+  phone: z.number().optional(),
+});
+
+export const UpdateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req;
+  const { name, password, phone } = <UserUpdateInput>req.body;
+  try {
+    if (userId) {
+      if (!userId) {
+        return res.status(400).json({ message: "Error with userID" });
+      }
+
+      const userDetails = await Users.findOne({ _id: userId });
+
+      if (!userDetails) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      try {
+        UserUpdateInputCheck.parse({ name, password, phone });
+      } catch (err: any) {
+        return res.status(400).json({ message: err.errors });
+      }
+
+      // console.log(checked);
+
+      // if (!checked.success) {
+      //   return res.json({ message: "Invalid login credentials types!" });
+      // }
+
+      if (name) userDetails.name = name;
+      if (phone) userDetails.phone = phone;
+      if (password) userDetails.password = password;
+
+      await userDetails.save();
+
+      return res.status(200).json({ message: "User updated successfully." });
+    }
+    return res.status(400).json({ message: "Error with userID" });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
