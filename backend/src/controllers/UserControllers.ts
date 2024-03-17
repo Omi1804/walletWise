@@ -119,12 +119,6 @@ export const UpdateUser = async (
         return res.status(400).json({ message: err.errors });
       }
 
-      // console.log(checked);
-
-      // if (!checked.success) {
-      //   return res.json({ message: "Invalid login credentials types!" });
-      // }
-
       if (name) userDetails.name = name;
       if (phone) userDetails.phone = phone;
       if (password) userDetails.password = password;
@@ -138,4 +132,57 @@ export const UpdateUser = async (
     console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
+};
+
+export const GetAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const allUsers = await Users.find().select("name id");
+    return res.status(200).json({ message: allUsers });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const SearchForUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const filter = req.query.filter || "";
+
+    const users = await Users.find({
+      name: {
+        $regex: filter,
+        $options: "i",
+      },
+    }).select("name id email phone");
+
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error("Error searching for users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+
+  // if my schema contains firstname and lastname then i use query
+  /*
+  const users = await User.find({
+    $or: [
+      {
+        firstName: {
+          $regex: filter,
+        },
+      },
+      {
+        lastName: {
+          $regex: filter,
+        },
+      },
+    ],
+  });
+  */
 };
