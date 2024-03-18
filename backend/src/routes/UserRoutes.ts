@@ -7,7 +7,7 @@ import {
   UserLogin,
 } from "../controllers";
 import authenticateUser from "../middlewares/Auth";
-import { Users } from "../models/User";
+
 const router = express.Router();
 
 //signup route

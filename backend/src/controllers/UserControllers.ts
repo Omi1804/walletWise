@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 const secret = process.env.SEC_KEY;
-import { Users } from "../models/User";
 import { UserInput, UserLogInput, UserUpdateInput } from "../dto";
+import { Account, Users } from "../models";
 
 const UserSignupInputCheck = z.object({
   email: z.string().email().max(20),
@@ -36,6 +36,11 @@ export const CreateUser = async (
     const createUser = await Users.create({ email, password, name, phone });
 
     const userId = createUser._id;
+
+    await Account.create({
+      userId: userId,
+      balance: 1 + Math.random() * 1000,
+    });
 
     return res.json({ message: "User created successfully" });
   } catch (err) {
