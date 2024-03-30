@@ -1,1 +1,4 @@
-export interface AccountInput {}
+export interface AccountInput {
+  to: string;
+  amount: number;
+}
